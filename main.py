@@ -30,11 +30,11 @@ def inicio():
 
 @app.get('/bares/{bar_id}/comentarios')
 def get_comentarios(bar_id: int):
-    comentarios = None  # TODO: completar
+    comentarios = db["comentarios".find()]
     return comentarios
 
 @app.post('/bares/{bar_id}/comentarios')
-def post_comentario(bar_id: int, datos: dict):
+def post_eventpos(bar_id: int, datos: dict):
     datos['bar_id'] = bar_id
     datos['fecha']  = datetime.now().isoformat()
     # TODO: completar
@@ -42,7 +42,21 @@ def post_comentario(bar_id: int, datos: dict):
 
 # TODO: implementar GET /bares/{bar_id}/eventos
 # Debe retornar todos los eventos del bar desde la colección 'eventos'
+@app.get('/bares/{bar_id}/eventos')
+def get_eventos(bar_id: int):
+    eventos = db["eventos".find()]
+    return eventos
 
 # TODO: implementar POST /bares/{bar_id}/eventos  
 # Debe insertar el evento en la colección 'eventos'
 # Recuerde agregar bar_id y fecha_creacion al documento antes de insertar
+@app.post('/bares/{bar_id}/eventos')
+def post_eventos(bar_id: int, datos: dict):
+    datos['bar_id'] = bar_id
+    datos['fecha']  = datetime.now().isoformat()
+    # TODO: completar
+    return {'mensaje': 'evento guardado'}
+
+# Comentario: BAR_ID, E-MAIL, NOMBRE DE LA PERSONA QUE COMENTA, ID DEL COMENTARIO, FECHA, TEXTO, Clificacion
+# Evento: lugar, fecha, hoR, tematica, id, limite de personas
+ 
