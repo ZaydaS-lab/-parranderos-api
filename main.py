@@ -28,35 +28,48 @@ db = client["parranderos"]
 def inicio():
     return {"estado": "API funcionando correctamente"}
 
+
 @app.get('/bares/{bar_id}/comentarios')
 def get_comentarios(bar_id: int):
-    comentarios = db["comentarios".find()]
-    return comentarios
+    comentarios =  db["bares"].finde_one({"Comentarios escritos": bar_id}, {"_id": 0})
+
+    # TODO: completar
+    return comentarios or {}
 
 @app.post('/bares/{bar_id}/comentarios')
-def post_eventpos(bar_id: int, datos: dict):
+def post_comentario(bar_id: int, datos: dict):
+
+
+    #Son campos que existen pero no se deben pedir al usuario
+
     datos['bar_id'] = bar_id
     datos['fecha']  = datetime.now().isoformat()
     # TODO: completar
+    db["comentarios"].insert_one[datos]
+
     return {'mensaje': 'Comentario guardado'}
 
 # TODO: implementar GET /bares/{bar_id}/eventos
 # Debe retornar todos los eventos del bar desde la colección 'eventos'
+
 @app.get('/bares/{bar_id}/eventos')
 def get_eventos(bar_id: int):
-    eventos = db["eventos".find()]
-    return eventos
+    eventos = list(db.eventos.find({"bar_id": bar_id},{"_id": 0}))
+
+    # TODO: completar
+    return eventos or {}
+
 
 # TODO: implementar POST /bares/{bar_id}/eventos  
 # Debe insertar el evento en la colección 'eventos'
 # Recuerde agregar bar_id y fecha_creacion al documento antes de insertar
 @app.post('/bares/{bar_id}/eventos')
-def post_eventos(bar_id: int, datos: dict):
-    datos['bar_id'] = bar_id
-    datos['fecha']  = datetime.now().isoformat()
-    # TODO: completar
-    return {'mensaje': 'evento guardado'}
+def post_evento(bar_id: int, datos: dict):
 
-# Comentario: BAR_ID, E-MAIL, NOMBRE DE LA PERSONA QUE COMENTA, ID DEL COMENTARIO, FECHA, TEXTO, Clificacion
-# Evento: lugar, fecha, hoR, tematica, id, limite de personas
+    datos["bar_id"] = bar_id
+    datos["fecha_creacion"] = datetime.now()
+    #Son campos que existen pero no se deben pedir al usuario
+    # TODO: completar
+    resultado = db.db["evento"].insert_one[datos]
+
  
