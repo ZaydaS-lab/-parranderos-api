@@ -31,45 +31,50 @@ def inicio():
 
 @app.get('/bares/{bar_id}/comentarios')
 def get_comentarios(bar_id: int):
-    comentarios =  db["bares"].finde_one({"Comentarios escritos": bar_id}, {"_id": 0})
+    # Buscar en la colección "comentarios_bares"
+    resultados = db["comentarios_bares"].find({"bar_id": bar_id})
+    
+    # Convertir los resultados a una lista que Python pueda enviar
+    comentarios = []
+    for documento in resultados:
+        documento["_id"] = str(documento["_id"])  # MongoDB usa _id especial, lo convertimos a texto
+        comentarios.append(documento)
+    
+    return comentarios  # Si no hay comentarios, devuelve una lista vacía []
 
-    # TODO: completar
-    return comentarios or {}
 
 @app.post('/bares/{bar_id}/comentarios')
 def post_comentario(bar_id: int, datos: dict):
-
-
-    #Son campos que existen pero no se deben pedir al usuario
-
+    # Agregar el bar_id y la fecha al documento (el PDF dice que ya están agregados ANTES del TODO)
     datos['bar_id'] = bar_id
-    datos['fecha']  = datetime.now().isoformat()
-    # TODO: completar
-    db["comentarios"].insert_one[datos]
+    datos['fecha'] = datetime.now().isoformat()
+    
+    # Insertar en MongoDB
+    resultado = db["comentarios_bares"].insert_one(datos)
+    
+    return {"mensaje": "Comentario guardado", "id": str(resultado.inserted_id)}
 
-    return {'mensaje': 'Comentario guardado'}
-
-# TODO: implementar GET /bares/{bar_id}/eventos
-# Debe retornar todos los eventos del bar desde la colección 'eventos'
 
 @app.get('/bares/{bar_id}/eventos')
 def get_eventos(bar_id: int):
-    eventos = list(db.eventos.find({"bar_id": bar_id},{"_id": 0}))
+    # Buscar en la colección "eventos"
+    resultados = db["eventos"].find({"bar_id": bar_id})
+    
+    # Convertir a lista
+    eventos = []
+    for documento in resultados:
+        documento["_id"] = str(documento["_id"])
+        eventos.append(documento)
+    
+    return eventos
 
-    # TODO: completar
-    return eventos or {}
-
-
-# TODO: implementar POST /bares/{bar_id}/eventos  
-# Debe insertar el evento en la colección 'eventos'
-# Recuerde agregar bar_id y fecha_creacion al documento antes de insertar
 @app.post('/bares/{bar_id}/eventos')
 def post_evento(bar_id: int, datos: dict):
-
+    # Agregar bar_id y fecha_creacion
     datos["bar_id"] = bar_id
-    datos["fecha_creacion"] = datetime.now()
-    #Son campos que existen pero no se deben pedir al usuario
-    # TODO: completar
-    resultado = db.db["evento"].insert_one[datos]
-
- 
+    datos["fecha_creacion"] = datetime.now().isoformat()
+    
+    # Insertar en MongoDB
+    resultado = db["eventos"].insert_one(datos)
+    
+    return {"mensaje": "Evento guardado", "id": str(resultado.inserted_id)}
