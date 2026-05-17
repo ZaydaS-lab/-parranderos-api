@@ -13,16 +13,13 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-#os.environ para despliegue. Descomente cuando ya probó todo local.
-client = MongoClient(os.environ["MONGO_URI"])
-# TODO: conectarse al cluster Admonsis  
-# client = MongoClient("mongodb://<usuario>:<contraseña>@157.253.236.88:8087")
+if os.environ.get("MONGO_URI"):
+    client = MongoClient(os.environ["MONGO_URI"])
+else:
 
-# client = MongoClient("mongodb://ISIS2304D33202610:dZ0ce0y9R0HV@157.253.236.88:808")
-# TODO: conectarse a la base de datos Admonsis  
-# db = client["ISIS2304D33202610"]
+    client = MongoClient("mongodb://ISIS2304D33202610:dZ0ce0y9R0HV@157.253.236.88:8087")
+
 db = client["parranderos"]
-
 
 @app.get("/")
 def inicio():
@@ -31,50 +28,32 @@ def inicio():
 
 @app.get('/bares/{bar_id}/comentarios')
 def get_comentarios(bar_id: int):
-    # Buscar en la colección "comentarios_bares"
-    resultados = db["comentarios_bares"].find({"bar_id": bar_id})
-    
-    # Convertir los resultados a una lista que Python pueda enviar
     comentarios = []
-    for documento in resultados:
-        documento["_id"] = str(documento["_id"])  # MongoDB usa _id especial, lo convertimos a texto
-        comentarios.append(documento)
-    
-    return comentarios  # Si no hay comentarios, devuelve una lista vacía []
+    for doc in db["comentarios_bares"].find({"bar_id": bar_id}):
+        doc["_id"] = str(doc["_id"])
+        comentarios.append(doc)
+    return comentarios
 
 
 @app.post('/bares/{bar_id}/comentarios')
 def post_comentario(bar_id: int, datos: dict):
-    # Agregar el bar_id y la fecha al documento (el PDF dice que ya están agregados ANTES del TODO)
     datos['bar_id'] = bar_id
     datos['fecha'] = datetime.now().isoformat()
-    
-    # Insertar en MongoDB
     resultado = db["comentarios_bares"].insert_one(datos)
-    
     return {"mensaje": "Comentario guardado", "id": str(resultado.inserted_id)}
 
 
 @app.get('/bares/{bar_id}/eventos')
 def get_eventos(bar_id: int):
-    # Buscar en la colección "eventos"
-    resultados = db["eventos"].find({"bar_id": bar_id})
-    
-    # Convertir a lista
     eventos = []
-    for documento in resultados:
-        documento["_id"] = str(documento["_id"])
-        eventos.append(documento)
-    
+    for doc in db["eventos"].find({"bar_id": bar_id}):
+        doc["_id"] = str(doc["_id"])
+        eventos.append(doc)
     return eventos
 
 @app.post('/bares/{bar_id}/eventos')
 def post_evento(bar_id: int, datos: dict):
-    # Agregar bar_id y fecha_creacion
     datos["bar_id"] = bar_id
     datos["fecha_creacion"] = datetime.now().isoformat()
-    
-    # Insertar en MongoDB
     resultado = db["eventos"].insert_one(datos)
-    
     return {"mensaje": "Evento guardado", "id": str(resultado.inserted_id)}
