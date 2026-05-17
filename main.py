@@ -19,7 +19,7 @@ else:
 
     client = MongoClient("mongodb://ISIS2304D33202610:dZ0ce0y9R0HV@157.253.236.88:8087")
 
-db = client["parranderos"]
+db = client["ISIS2304D33202610"]
 
 @app.get("/")
 def inicio():
